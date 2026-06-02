@@ -238,15 +238,16 @@ function Dashboard() {
   );
 }
 
-const router = createBrowserRouter([
-  {
-    path: "/",
-    element: <Outlet />,
-    children: [
-      { index: true, element: <Dashboard /> },
-    ],
-  },
-]);
+const router = createBrowserRouter(
+  [
+    {
+      path: '/',
+      element: <Outlet />,
+      children: [{ index: true, element: <Dashboard /> }],
+    },
+  ],
+  { basename: import.meta.env.BASE_URL },
+);
 
 export default function App() {
   return (
