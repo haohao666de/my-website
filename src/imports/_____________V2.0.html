@@ -1,0 +1,1144 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>关键指标智汇平台（发电类）— 龙源电力集团股份有限公司</title>
+<script src="./chart.umd.js"></script>
+<script src="./chartjs-plugin-annotation.min.js"></script>
+<style>
+  @import url('./css2?family=Noto+Sans+SC:wght@300;400;500;700&display=swap');
+
+  :root {
+    --bg-deep: #e8f5f3;
+    --bg-panel: #ffffff;
+    --accent-cyan: #00bdaa;
+    --accent-cyan-light: #4db6ac;
+    --accent-green: #4caf50;
+    --accent-orange: #ff9800;
+    --accent-red: #c62828;
+    --text-primary: #333333;
+    --text-secondary: #555555;
+    --text-muted: #888888;
+    --border-color: rgba(0, 189, 170, 0.2);
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'Noto Sans SC', 'Microsoft YaHei', sans-serif;
+    background: linear-gradient(135deg, #e8f5f3 0%, #f0f9f7 50%, #e0f2f0 100%);
+    color: var(--text-primary);
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  .page-wrap {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .header {
+    background: linear-gradient(90deg, #00796b 0%, #00bdaa 100%);
+    padding: 12px 24px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    box-shadow: 0 4px 20px rgba(0, 121, 107, 0.3);
+    position: relative;
+  }
+  .header::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 2px;
+    background: linear-gradient(90deg, rgba(255,255,255,0.3), rgba(255,255,255,0.1));
+  }
+  .header-left {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+  }
+  .logo-box {
+    width: 44px;
+    height: 44px;
+    background: linear-gradient(135deg, #fff 0%, #f0f9f7 100%);
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 22px;
+    font-weight: 700;
+    color: #00796b;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.15);
+  }
+  .header-title {
+    color: white;
+  }
+  .company-name {
+    font-size: 14px;
+    opacity: 0.9;
+    letter-spacing: 1px;
+  }
+  .page-title {
+    font-size: 22px;
+    font-weight: 700;
+    letter-spacing: 2px;
+    text-shadow: 0 2px 4px rgba(0,0,0,0.2);
+  }
+  .header-center {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+  }
+  .unit-selector {
+    display: flex;
+    background: rgba(255,255,255,0.15);
+    border-radius: 6px;
+    padding: 4px;
+  }
+  .unit-btn {
+    padding: 6px 14px;
+    border: none;
+    background: transparent;
+    color: white;
+    font-size: 12px;
+    cursor: pointer;
+    border-radius: 4px;
+    transition: all 0.2s;
+  }
+  .unit-btn.active {
+    background: white;
+    color: #00796b;
+    font-weight: 600;
+  }
+  .header-right {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    color: white;
+  }
+  .header-time {
+    font-size: 28px;
+    font-weight: 300;
+    letter-spacing: 2px;
+    text-shadow: 0 2px 4px rgba(0,0,0,0.2);
+  }
+  .header-date {
+    font-size: 12px;
+    opacity: 0.8;
+    text-align: right;
+  }
+  .filter-group {
+    display: flex;
+    gap: 8px;
+  }
+  .filter-select {
+    background: rgba(255,255,255,0.15);
+    border: 1px solid rgba(255,255,255,0.3);
+    color: white;
+    font-size: 12px;
+    padding: 6px 12px;
+    border-radius: 6px;
+    cursor: pointer;
+    outline: none;
+  }
+  .filter-select option {
+    background: #00796b;
+    color: white;
+  }
+
+  .main {
+    flex: 1;
+    padding: 16px 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    overflow-y: auto;
+    padding-bottom: 60px;
+  }
+
+  .kpi-row {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 12px;
+  }
+  .kpi-card {
+    background: var(--bg-panel);
+    border-radius: 10px;
+    padding: 14px 16px;
+    border-left: 4px solid var(--accent-cyan);
+    box-shadow: 0 4px 15px rgba(0, 189, 170, 0.1);
+    transition: transform 0.2s, box-shadow 0.2s;
+    position: relative;
+    overflow: hidden;
+  }
+  .kpi-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: 80px;
+    height: 80px;
+    background: linear-gradient(135deg, rgba(0,189,170,0.08) 0%, transparent 100%);
+    border-radius: 0 10px 0 100%;
+  }
+  .kpi-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 25px rgba(0, 189, 170, 0.2);
+  }
+  .kpi-card.warning { border-left-color: var(--accent-orange); }
+  .kpi-card.danger { border-left-color: var(--accent-red); }
+  .kpi-card.info { border-left-color: #2196f3; }
+  .kpi-label {
+    font-size: 11px;
+    color: var(--text-muted);
+    letter-spacing: 1px;
+    margin-bottom: 6px;
+    position: relative;
+    z-index: 1;
+  }
+  .kpi-value {
+    font-weight: 700;
+    font-size: 24px;
+    line-height: 1;
+    margin-bottom: 4px;
+    position: relative;
+    z-index: 1;
+  }
+  .kpi-unit {
+    font-size: 13px;
+    font-weight: 400;
+    margin-left: 2px;
+  }
+  .kpi-sub {
+    font-size: 10px;
+    color: var(--text-muted);
+    margin-top: 2px;
+    line-height: 1.4;
+    position: relative;
+    z-index: 1;
+  }
+  .kpi-delta {
+    font-size: 11px;
+    margin-top: 3px;
+    position: relative;
+    z-index: 1;
+  }
+  .kpi-delta.pos { color: var(--accent-green); }
+  .kpi-delta.neg { color: var(--accent-red); }
+  .v-green { color: var(--accent-green); }
+  .v-yellow { color: var(--accent-orange); }
+  .v-orange { color: #e65100; }
+  .v-red { color: var(--accent-red); }
+  .v-cyan { color: var(--accent-cyan); }
+  .v-blue { color: #2196f3; }
+
+  .panel {
+    background: var(--bg-panel);
+    border-radius: 10px;
+    padding: 14px 16px;
+    box-shadow: 0 4px 15px rgba(0, 189, 170, 0.08);
+  }
+  .panel-title {
+    font-size: 13px;
+    color: var(--text-secondary);
+    letter-spacing: 1px;
+    margin-bottom: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .panel-actions {
+    display: flex;
+    gap: 6px;
+  }
+  .chart-action-btn {
+    background: rgba(0, 189, 170, 0.1);
+    border: 1px solid var(--border-color);
+    color: var(--accent-cyan);
+    padding: 4px 10px;
+    border-radius: 4px;
+    font-size: 10px;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .chart-action-btn:hover {
+    background: rgba(0, 189, 170, 0.15);
+  }
+
+  .chart-container {
+    position: relative;
+    width: 100%;
+  }
+
+  .two-col {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 14px;
+  }
+  .three-col {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 12px;
+  }
+
+  .pie-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+  }
+  .pie-legend {
+    margin-top: 8px;
+  }
+  .pie-legend-item {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 11px;
+    color: var(--text-secondary);
+    padding: 3px 0;
+  }
+  .pie-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 3px;
+    flex-shrink: 0;
+  }
+
+  .data-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 12px;
+  }
+  .data-table thead tr {
+    border-bottom: 2px solid var(--border-color);
+  }
+  .data-table th {
+    padding: 10px 12px;
+    text-align: left;
+    color: var(--text-muted);
+    font-weight: 500;
+    letter-spacing: 0.5px;
+    white-space: nowrap;
+    background: rgba(0, 189, 170, 0.03);
+  }
+  .data-table td {
+    padding: 10px 12px;
+    border-bottom: 1px solid rgba(0, 189, 170, 0.1);
+    color: var(--text-secondary);
+  }
+  .data-table tbody tr:hover td {
+    background: rgba(0, 189, 170, 0.05);
+    cursor: pointer;
+  }
+  .badge {
+    display: inline-block;
+    padding: 3px 8px;
+    border-radius: 4px;
+    font-size: 11px;
+    font-weight: 500;
+  }
+  .badge-green {
+    background: rgba(76, 175, 80, 0.1);
+    color: var(--accent-green);
+    border: 1px solid rgba(76, 175, 80, 0.2);
+  }
+  .badge-red {
+    background: rgba(198, 40, 40, 0.1);
+    color: var(--accent-red);
+    border: 1px solid rgba(198, 40, 40, 0.2);
+  }
+  .badge-yellow {
+    background: rgba(255, 152, 0, 0.1);
+    color: var(--accent-orange);
+    border: 1px solid rgba(255, 152, 0, 0.2);
+  }
+
+  .edit-modal-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    z-index: 300;
+    background: rgba(0, 0, 0, 0.5);
+    align-items: center;
+    justify-content: center;
+  }
+  .edit-modal-overlay.open {
+    display: flex;
+  }
+  .edit-modal {
+    background: var(--bg-panel);
+    border-radius: 12px;
+    width: 500px;
+    max-width: 95vw;
+    padding: 20px;
+    position: relative;
+  }
+  .edit-modal-title {
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin-bottom: 16px;
+  }
+  .edit-modal-close {
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    background: rgba(0, 189, 170, 0.1);
+    border: 1px solid var(--border-color);
+    color: var(--text-secondary);
+    cursor: pointer;
+    padding: 4px 12px;
+    border-radius: 4px;
+    font-size: 12px;
+  }
+  .edit-form {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+  .form-row {
+    display: flex;
+    gap: 12px;
+    align-items: center;
+  }
+  .form-label {
+    font-size: 12px;
+    color: var(--text-secondary);
+    min-width: 60px;
+  }
+  .form-input {
+    flex: 1;
+    padding: 8px 12px;
+    border: 1px solid var(--border-color);
+    border-radius: 6px;
+    font-size: 12px;
+    outline: none;
+    transition: border-color 0.2s;
+  }
+  .form-input:focus {
+    border-color: var(--accent-cyan);
+  }
+  .form-actions {
+    display: flex;
+    gap: 10px;
+    justify-content: flex-end;
+    margin-top: 16px;
+  }
+  .form-btn {
+    padding: 8px 20px;
+    border-radius: 6px;
+    font-size: 12px;
+    font-weight: 500;
+    cursor: pointer;
+    border: none;
+    transition: all 0.2s;
+  }
+  .form-btn.primary {
+    background: var(--accent-cyan);
+    color: white;
+  }
+  .form-btn.secondary {
+    background: rgba(0, 189, 170, 0.1);
+    color: var(--accent-cyan);
+    border: 1px solid var(--border-color);
+  }
+
+  .chart-type-switch {
+    display: flex;
+    gap: 4px;
+    background: rgba(0, 189, 170, 0.1);
+    border-radius: 4px;
+    padding: 2px;
+  }
+  .chart-type-btn {
+    padding: 4px 10px;
+    border: none;
+    background: transparent;
+    color: var(--text-muted);
+    font-size: 10px;
+    cursor: pointer;
+    border-radius: 3px;
+    transition: all 0.2s;
+  }
+  .chart-type-btn.active {
+    background: white;
+    color: var(--accent-cyan);
+    font-weight: 600;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+  }
+
+  .ai-bar {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    z-index: 200;
+    background: linear-gradient(90deg, rgba(0, 121, 107, 0.97), rgba(0, 189, 170, 0.97));
+    padding: 12px 24px;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    box-shadow: 0 -4px 20px rgba(0, 121, 107, 0.3);
+  }
+  .ai-label {
+    font-weight: 600;
+    font-size: 13px;
+    color: white;
+    letter-spacing: 2px;
+    white-space: nowrap;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .ai-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: white;
+    animation: pulse 1.5s infinite;
+  }
+  @keyframes pulse {
+    0%,100% { opacity: 1; transform: scale(1); }
+    50% { opacity: 0.4; transform: scale(0.8); }
+  }
+  .ai-text {
+    font-size: 13px;
+    color: rgba(255,255,255,0.9);
+    overflow: hidden;
+    white-space: nowrap;
+    flex: 1;
+  }
+  .ai-text span {
+    display: inline-block;
+    animation: marquee 30s linear infinite;
+  }
+  @keyframes marquee {
+    0% { transform: translateX(100%); }
+    100% { transform: translateX(-100%); }
+  }
+</style>
+</head>
+<body>
+
+<div class="page-wrap">
+  <header class="header">
+    <div class="header-left">
+      <div class="logo-box">龙</div>
+      <div class="header-title">
+        <div class="company-name">龙源电力集团股份有限公司</div>
+        <div class="page-title">关键指标智汇平台（发电类）</div>
+      </div>
+    </div>
+    <div class="header-right">
+      <div>
+        <div class="header-time" id="clock">--:--:--</div>
+        <div class="header-date" id="dateStr">2026-06</div>
+      </div>
+      <div class="filter-group">
+        <select class="filter-select" id="yearSel">
+          <option value="2026" selected>2026年</option>
+          <option value="2025">2025年</option>
+        </select>
+        <select class="filter-select" id="monthSel">
+          <option value="6" selected>06月</option>
+          <option value="5">05月</option>
+          <option value="4">04月</option>
+          <option value="3">03月</option>
+        </select>
+        <select class="filter-select" id="regionSel">
+          <option value="all" selected>全部区域</option>
+          <option value="north">华北区域</option>
+          <option value="east">华东区域</option>
+          <option value="south">华南区域</option>
+          <option value="west">西北区域</option>
+          <option value="southwest">西南区域</option>
+        </select>
+        <select class="filter-select" id="companySel">
+          <option value="all" selected>全部公司</option>
+          <option value="company1">龙源电力</option>
+          <option value="company2">国电电力</option>
+          <option value="company3">大唐发电</option>
+          <option value="company4">华能国际</option>
+        </select>
+      </div>
+      <div class="unit-selector">
+        <button class="unit-btn" onclick="setUnit('yuan')">元</button>
+        <button class="unit-btn active" onclick="setUnit('wan')">万元</button>
+        <button class="unit-btn" onclick="setUnit('yi')">亿元</button>
+      </div>
+    </div>
+  </header>
+
+  <div class="main">
+    <div class="kpi-row">
+      <div class="kpi-card">
+        <div class="kpi-label">利润总额 <span style="color:#ff9800;font-size:9px;">月度考核</span></div>
+        <div class="kpi-value v-cyan" id="kpiProfit">135,680</div>
+        <div class="kpi-sub">年度预算 <span class="v-cyan">150,000</span> 万元<br/>执行率 <span class="v-green">90.5%</span><br/>上年同期 <span class="v-blue">128,456</span> 万元</div>
+        <div class="kpi-delta pos">同比 +5.6%</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-label">营业总收入 <span style="color:#2196f3;font-size:9px;">战新收入</span></div>
+        <div class="kpi-value v-green" id="kpiRevenue">892,345</div>
+        <div class="kpi-sub">年度预算 <span class="v-cyan">950,000</span> 万元<br/>执行率 <span class="v-green">93.9%</span><br/>上年同期 <span class="v-blue">856,789</span> 万元</div>
+        <div class="kpi-delta pos">同比 +4.2%</div>
+      </div>
+      <div class="kpi-card warning">
+        <div class="kpi-label">营业总成本 <span style="color:#e65100;font-size:9px;">提质增效</span></div>
+        <div class="kpi-value v-orange" id="kpiCost">756,890</div>
+        <div class="kpi-sub">年度预算 <span class="v-cyan">780,000</span> 万元<br/>执行率 <span class="v-yellow">97.0%</span><br/>上年同期 <span class="v-blue">723,456</span> 万元</div>
+        <div class="kpi-delta neg">同比 +4.6%</div>
+      </div>
+      <div class="kpi-card info">
+        <div class="kpi-label">资产总额</div>
+        <div class="kpi-value v-blue" id="kpiAssets">12,580,000</div>
+        <div class="kpi-sub">上年同期 <span class="v-blue">11,950,000</span> 万元</div>
+        <div class="kpi-delta pos">同比 +5.3%</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-label">劳动生产总值 <span style="color:#2196f3;font-size:9px;">目标责任</span></div>
+        <div class="kpi-value v-cyan" id="kpiLabor">345,678</div>
+        <div class="kpi-sub">上年同期 <span class="v-blue">321,098</span> 万元</div>
+        <div class="kpi-delta pos">同比 +7.7%</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-label">经济增加值 <span style="color:#2196f3;font-size:9px;">目标责任</span></div>
+        <div class="kpi-value v-green" id="kpiEVA">72,345</div>
+        <div class="kpi-sub">年度预算 <span class="v-cyan">75,000</span> 万元<br/>执行率 <span class="v-green">96.5%</span><br/>上年同期 <span class="v-blue">68,901</span> 万元</div>
+        <div class="kpi-delta pos">同比 +5.0%</div>
+      </div>
+      <div class="kpi-card danger">
+        <div class="kpi-label">亏损企业户数 <span style="color:#ff9800;font-size:9px;">月度考核</span></div>
+        <div class="kpi-value v-red" id="kpiLoss">10</div>
+        <div class="kpi-unit">个</div>
+        <div class="kpi-sub">上年同期 <span class="v-blue">12</span> 个</div>
+        <div class="kpi-delta pos">同比 -16.7%</div>
+      </div>
+    </div>
+
+    <div class="two-col">
+      <div class="panel">
+        <div class="panel-title">
+          <span>利润总额月度变动、同比增减</span>
+          <div class="panel-actions">
+            <div class="chart-type-switch">
+              <button class="chart-type-btn active" onclick="toggleChartType('profitChange', 'bar')">柱状图</button>
+              <button class="chart-type-btn" onclick="toggleChartType('profitChange', 'line')">折线图</button>
+            </div>
+            <button class="chart-action-btn" onclick="expandChart('profitChangePanel')">🔍 放大</button>
+          </div>
+        </div>
+        <div class="chart-container" style="height: 240px;" id="profitChangePanel">
+          <canvas id="profitChangeChart"></canvas>
+        </div>
+      </div>
+      <div class="panel">
+        <div class="panel-title">
+          <span>利润总额月度预算完成情况</span>
+          <div class="panel-actions">
+            <button class="chart-action-btn" onclick="openBudgetModal()">📝 补录预算</button>
+            <button class="chart-action-btn" onclick="expandChart('profitBudgetPanel')">🔍 放大</button>
+          </div>
+        </div>
+        <div class="chart-container" style="height: 240px;" id="profitBudgetPanel">
+          <canvas id="profitBudgetChart"></canvas>
+        </div>
+      </div>
+    </div>
+
+    <div class="two-col">
+      <div class="panel">
+        <div class="panel-title">
+          <span>战新收入月度变动、同比增减</span>
+          <div class="panel-actions">
+            <div class="chart-type-switch">
+              <button class="chart-type-btn" onclick="toggleChartType('newRevenue', 'bar')">柱状图</button>
+              <button class="chart-type-btn active" onclick="toggleChartType('newRevenue', 'line')">折线图</button>
+            </div>
+            <button class="chart-action-btn" onclick="expandChart('newRevenuePanel')">🔍 放大</button>
+          </div>
+        </div>
+        <div class="chart-container" style="height: 240px;" id="newRevenuePanel">
+          <canvas id="newRevenueChart"></canvas>
+        </div>
+      </div>
+      <div class="panel">
+        <div class="panel-title">
+          <span>成本费用与提质增效指标对比</span>
+          <div class="panel-actions">
+            <button class="chart-action-btn" onclick="openEfficiencyModal()">✏️ 编辑指标</button>
+            <button class="chart-action-btn" onclick="expandChart('costComparePanel')">🔍 放大</button>
+          </div>
+        </div>
+        <div class="chart-container" style="height: 240px;" id="costComparePanel">
+          <canvas id="costCompareChart"></canvas>
+        </div>
+      </div>
+    </div>
+
+    <div class="panel">
+      <div class="panel-title">亏损企业分析</div>
+      <div class="pie-row" style="height: 280px;">
+        <div style="flex: 1; display: flex; flex-direction: column; align-items: center;">
+          <div style="font-size: 12px; color: var(--text-muted); margin-bottom: 6px; font-weight: 500;">亏损企业户数占比</div>
+          <div class="chart-container" style="height: 160px; width: 100%; max-width: 200px;">
+            <canvas id="lossCountPie"></canvas>
+          </div>
+          <div class="pie-legend" id="lossCountLegend" style="width: 100%; padding: 8px 10px; flex-shrink: 0;"></div>
+        </div>
+        <div style="flex: 1; display: flex; flex-direction: column; align-items: center;">
+          <div style="font-size: 12px; color: var(--text-muted); margin-bottom: 6px; font-weight: 500;">亏损金额占比</div>
+          <div class="chart-container" style="height: 160px; width: 100%; max-width: 200px;">
+            <canvas id="lossAmountPie"></canvas>
+          </div>
+          <div class="pie-legend" id="lossAmountLegend" style="width: 100%; padding: 8px 10px; flex-shrink: 0;"></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="two-col">
+      <div class="panel">
+        <div class="panel-title">
+          <span>经济增加值趋势</span>
+          <div class="panel-actions">
+            <button class="chart-action-btn" onclick="expandChart('evaTrendPanel')">🔍 放大</button>
+          </div>
+        </div>
+        <div class="chart-container" style="height: 240px;" id="evaTrendPanel">
+          <canvas id="evaTrendChart"></canvas>
+        </div>
+      </div>
+      <div class="panel">
+        <div class="panel-title">
+          <span>财务比率完成情况</span>
+          <div class="panel-actions">
+            <button class="chart-action-btn" onclick="downloadRatioTable()">📥 下载</button>
+          </div>
+        </div>
+        <div style="overflow-x: auto;">
+          <table class="data-table" id="ratioTable">
+            <thead>
+              <tr>
+                <th>指标名称</th>
+                <th>本年完成值</th>
+                <th>年度目标</th>
+                <th>完成率</th>
+                <th>状态</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr><td><strong>营业收入利润率</strong></td><td><span class="v-cyan">8.65</span> %</td><td>10 %</td><td>86.5%</td><td><span class="badge badge-yellow">进行中</span></td></tr>
+              <tr><td><strong>单位容量完全成本</strong></td><td><span class="v-orange">2,856</span> 元/千瓦</td><td>2,700 元/千瓦</td><td>105.8%</td><td><span class="badge badge-red">超支</span></td></tr>
+              <tr><td><strong>资金成本率</strong></td><td><span class="v-green">4.25</span> %</td><td>4.5 %</td><td>94.4%</td><td><span class="badge badge-green">达标</span></td></tr>
+              <tr><td><strong>净资产收益率</strong></td><td><span class="v-cyan">6.82</span> %</td><td>7.5 %</td><td>90.9%</td><td><span class="badge badge-yellow">进行中</span></td></tr>
+              <tr><td><strong>营业收现率</strong></td><td><span class="v-green">102.3</span> %</td><td>100 %</td><td>102.3%</td><td><span class="badge badge-green">超额</span></td></tr>
+              <tr><td><strong>营业利润率</strong></td><td><span class="v-cyan">7.45</span> %</td><td>8.5 %</td><td>87.6%</td><td><span class="badge badge-yellow">进行中</span></td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="ai-bar">
+  <div class="ai-label"><div class="ai-dot"></div>AI 智能分析</div>
+  <div style="width: 1px; height: 20px; background: rgba(255,255,255,0.3);"></div>
+  <div class="ai-text">
+    <span>📊 利润总额完成率90.5%，较预算目标仍有提升空间；
+    ⚠ 营业总成本超预算3%，建议重点关注财务费用与管理费用控制；
+    ✅ 经济增加值完成率96.5%，超额完成月度目标；
+    📈 劳动生产总值同比增长7.7%，表现优异；
+    🎯 亏损企业户数同比减少2家，扭亏工作成效显著</span>
+  </div>
+</div>
+
+<div class="edit-modal-overlay" id="budgetModal">
+  <div class="edit-modal">
+    <button class="edit-modal-close" onclick="closeModal('budgetModal')">关闭</button>
+    <div class="edit-modal-title">月度预算补录表</div>
+    <div class="edit-form" id="budgetForm">
+      <div class="form-row"><span class="form-label">1月</span><input type="number" class="form-input" placeholder="预算金额" value="12000"></div>
+      <div class="form-row"><span class="form-label">2月</span><input type="number" class="form-input" placeholder="预算金额" value="13000"></div>
+      <div class="form-row"><span class="form-label">3月</span><input type="number" class="form-input" placeholder="预算金额" value="15000"></div>
+      <div class="form-row"><span class="form-label">4月</span><input type="number" class="form-input" placeholder="预算金额" value="14000"></div>
+      <div class="form-row"><span class="form-label">5月</span><input type="number" class="form-input" placeholder="预算金额" value="15000"></div>
+      <div class="form-row"><span class="form-label">6月</span><input type="number" class="form-input" placeholder="预算金额" value="16000"></div>
+      <div class="form-row"><span class="form-label">7月</span><input type="number" class="form-input" placeholder="预算金额"></div>
+      <div class="form-row"><span class="form-label">8月</span><input type="number" class="form-input" placeholder="预算金额"></div>
+      <div class="form-row"><span class="form-label">9月</span><input type="number" class="form-input" placeholder="预算金额"></div>
+      <div class="form-row"><span class="form-label">10月</span><input type="number" class="form-input" placeholder="预算金额"></div>
+      <div class="form-row"><span class="form-label">11月</span><input type="number" class="form-input" placeholder="预算金额"></div>
+      <div class="form-row"><span class="form-label">12月</span><input type="number" class="form-input" placeholder="预算金额"></div>
+      <div class="form-actions">
+        <button class="form-btn secondary" onclick="closeModal('budgetModal')">取消</button>
+        <button class="form-btn primary" onclick="saveBudget()">保存并生成图表</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="edit-modal-overlay" id="efficiencyModal">
+  <div class="edit-modal">
+    <button class="edit-modal-close" onclick="closeModal('efficiencyModal')">关闭</button>
+    <div class="edit-modal-title">提质增效指标设置</div>
+    <div class="edit-form" id="efficiencyForm">
+      <div class="form-row"><span class="form-label">财务费用</span><input type="number" class="form-input" placeholder="提质增效目标" value="125000"></div>
+      <div class="form-row"><span class="form-label">其他费用</span><input type="number" class="form-input" placeholder="提质增效目标" value="45000"></div>
+      <div class="form-row"><span class="form-label">管理费用</span><input type="number" class="form-input" placeholder="提质增效目标" value="85000"></div>
+      <div class="form-row"><span class="form-label">生产费用</span><input type="number" class="form-input" placeholder="提质增效目标" value="420000"></div>
+      <div class="form-row"><span class="form-label">安全生产费</span><input type="number" class="form-input" placeholder="提质增效目标" value="80000"></div>
+      <div class="form-actions">
+        <button class="form-btn secondary" onclick="closeModal('efficiencyModal')">取消</button>
+        <button class="form-btn primary" onclick="saveEfficiency()">保存并更新图表</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+let currentUnit = 'wan';
+let charts = {};
+
+function tick() {
+  const now = new Date();
+  document.getElementById('clock').textContent = now.toLocaleTimeString('zh-CN', { hour12: false });
+  document.getElementById('dateStr').textContent = now.toLocaleDateString('zh-CN');
+}
+setInterval(tick, 1000);
+tick();
+
+function setUnit(unit) {
+  currentUnit = unit;
+  document.querySelectorAll('.unit-btn').forEach(b => b.classList.remove('active'));
+  event.target.classList.add('active');
+  updateKPIUnits();
+}
+
+function updateKPIUnits() {
+  const multipliers = { yuan: 10000, wan: 1, yi: 0.0001 };
+  const units = { yuan: '元', wan: '万元', yi: '亿元' };
+  const kpis = ['kpiProfit', 'kpiRevenue', 'kpiCost', 'kpiAssets', 'kpiLabor', 'kpiEVA'];
+  const baseValues = {
+    kpiProfit: 135680, kpiRevenue: 892345, kpiCost: 756890,
+    kpiAssets: 12580000, kpiLabor: 345678, kpiEVA: 72345
+  };
+  
+  kpis.forEach(id => {
+    const el = document.getElementById(id);
+    if (el) {
+      const value = baseValues[id] * multipliers[currentUnit];
+      el.textContent = value.toLocaleString();
+    }
+  });
+}
+
+function openBudgetModal() {
+  document.getElementById('budgetModal').classList.add('open');
+}
+
+function openEfficiencyModal() {
+  document.getElementById('efficiencyModal').classList.add('open');
+}
+
+function closeModal(modalId) {
+  document.getElementById(modalId).classList.remove('open');
+}
+
+function saveBudget() {
+  closeModal('budgetModal');
+  initCharts();
+  alert('预算数据已保存，图表已更新');
+}
+
+function saveEfficiency() {
+  closeModal('efficiencyModal');
+  initCharts();
+  alert('提质增效指标已保存，图表已更新');
+}
+
+function expandChart(panelId) {
+  const panel = document.getElementById(panelId);
+  if (panel) {
+    const currentHeight = panel.style.height;
+    panel.style.height = currentHeight === '400px' ? '240px' : '400px';
+  }
+}
+
+function toggleChartType(chartId, type) {
+  event.target.parentElement.querySelectorAll('.chart-type-btn').forEach(b => b.classList.remove('active'));
+  event.target.classList.add('active');
+  
+  if (charts[chartId]) {
+    charts[chartId].destroy();
+  }
+  
+  if (chartId === 'profitChange') {
+    initProfitChangeChart(type);
+  } else if (chartId === 'newRevenue') {
+    initNewRevenueChart(type);
+  }
+}
+
+function downloadRatioTable() {
+  const table = document.getElementById('ratioTable');
+  let csv = '指标名称,本年完成值,年度目标,完成率,状态\n';
+  table.querySelectorAll('tbody tr').forEach(row => {
+    const cells = row.querySelectorAll('td');
+    const rowData = Array.from(cells).map(cell => {
+      const text = cell.textContent.trim();
+      return text.includes('badge') ? cell.querySelector('.badge').textContent : text;
+    });
+    csv += rowData.join(',') + '\n';
+  });
+  
+  const blob = new Blob(['\uFEFF' + csv], { type: 'text/csv' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = '财务比率完成情况.csv';
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+}
+
+Chart.defaults.color = '#555555';
+Chart.defaults.font.family = "'Noto Sans SC', sans-serif";
+Chart.defaults.font.size = 11;
+
+const months = ['1月', '2月', '3月', '4月', '5月', '6月', '7月', '8月', '9月', '10月', '11月', '12月'];
+
+function initCharts() {
+  initProfitChangeChart('bar');
+  initProfitBudgetChart();
+  initNewRevenueChart('line');
+  initCostCompareChart();
+  initEvaTrendChart();
+  initLossPies();
+}
+
+function initProfitChangeChart(type) {
+  const profitData = [18500, 21200, 24800, 22300, 24560, 24280, null, null, null, null, null, null];
+  const lastYearData = [17500, 19800, 23200, 21100, 22800, 21800, null, null, null, null, null, null];
+  
+  if (charts['profitChange']) charts['profitChange'].destroy();
+  
+  charts['profitChange'] = new Chart(document.getElementById('profitChangeChart'), {
+    type: type,
+    data: {
+      labels: months,
+      datasets: [
+        { label: '本年利润总额', data: profitData, borderColor: '#00bdaa', backgroundColor: 'rgba(0, 189, 170, 0.7)', borderWidth: 2, borderRadius: type === 'bar' ? 4 : 0 },
+        { label: '上年同期', data: lastYearData, borderColor: '#78909C', backgroundColor: 'rgba(120, 144, 156, 0.5)', borderWidth: 2, borderRadius: type === 'bar' ? 4 : 0 }
+      ]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: { display: true, position: 'top', labels: { boxWidth: 10, padding: 6, font: { size: 10 } } }
+      },
+      scales: {
+        x: { grid: { color: 'rgba(0,189,170,0.06)' }, ticks: { color: '#555555', font: { size: 10 } } },
+        y: { grid: { color: 'rgba(0,189,170,0.06)' }, ticks: { color: '#555555', font: { size: 10 }, callback: v => v.toLocaleString() + '万' } }
+      }
+    }
+  });
+}
+
+function initProfitBudgetChart() {
+  const actualData = [18500, 21200, 24800, 22300, 24560, 24280, null, null, null, null, null, null];
+  const budgetData = [12000, 13000, 15000, 14000, 15000, 16000, 17000, 18000, 17000, 16000, 15000, 18000];
+  
+  if (charts['profitBudget']) charts['profitBudget'].destroy();
+  
+  charts['profitBudget'] = new Chart(document.getElementById('profitBudgetChart'), {
+    type: 'bar',
+    data: {
+      labels: months,
+      datasets: [
+        { label: '实际完成', data: actualData, backgroundColor: 'rgba(0, 189, 170, 0.8)', borderWidth: 1, borderRadius: 4 },
+        { label: '月度预算', data: budgetData, backgroundColor: 'rgba(255, 152, 0, 0.6)', borderWidth: 1, borderRadius: 4 }
+      ]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: { display: true, position: 'top', labels: { boxWidth: 10, padding: 6, font: { size: 10 } } }
+      },
+      scales: {
+        x: { grid: { color: 'rgba(0,189,170,0.06)' }, ticks: { color: '#555555', font: { size: 10 } } },
+        y: { grid: { color: 'rgba(0,189,170,0.06)' }, ticks: { color: '#555555', font: { size: 10 }, callback: v => v.toLocaleString() + '万' } }
+      }
+    }
+  });
+}
+
+function initNewRevenueChart(type) {
+  const revenueData = [135000, 142000, 158000, 148000, 156000, 153345, null, null, null, null, null, null];
+  const lastYearData = [128000, 135000, 152000, 141000, 148000, 146000, null, null, null, null, null, null];
+  
+  if (charts['newRevenue']) charts['newRevenue'].destroy();
+  
+  charts['newRevenue'] = new Chart(document.getElementById('newRevenueChart'), {
+    type: type,
+    data: {
+      labels: months,
+      datasets: [
+        { label: '本年战新收入', data: revenueData, borderColor: '#2196f3', backgroundColor: 'rgba(33, 150, 243, 0.1)', borderWidth: 2, fill: type === 'line', tension: type === 'line' ? 0.4 : 0, borderRadius: type === 'bar' ? 4 : 0 },
+        { label: '上年同期', data: lastYearData, borderColor: '#78909C', backgroundColor: 'rgba(120, 144, 156, 0.1)', borderWidth: 2, fill: type === 'line', tension: type === 'line' ? 0.4 : 0, borderRadius: type === 'bar' ? 4 : 0 }
+      ]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: { display: true, position: 'top', labels: { boxWidth: 10, padding: 6, font: { size: 10 } } }
+      },
+      scales: {
+        x: { grid: { color: 'rgba(0,189,170,0.06)' }, ticks: { color: '#555555', font: { size: 10 } } },
+        y: { grid: { color: 'rgba(0,189,170,0.06)' }, ticks: { color: '#555555', font: { size: 10 }, callback: v => (v/10000).toFixed(0) + '亿' } }
+      }
+    }
+  });
+}
+
+function initCostCompareChart() {
+  const costCategories = ['财务费用', '其他费用', '管理费用', '生产费用', '安全生产费'];
+  const actualData = [132000, 48500, 89600, 435000, 51790];
+  const targetData = [125000, 45000, 85000, 420000, 80000];
+  
+  if (charts['costCompare']) charts['costCompare'].destroy();
+  
+  charts['costCompare'] = new Chart(document.getElementById('costCompareChart'), {
+    type: 'bar',
+    data: {
+      labels: costCategories,
+      datasets: [
+        { label: '本年累计', data: actualData, backgroundColor: 'rgba(255, 152, 0, 0.8)', borderWidth: 1, borderRadius: 4 },
+        { label: '提质增效目标', data: targetData, backgroundColor: 'rgba(76, 175, 80, 0.8)', borderWidth: 1, borderRadius: 4 }
+      ]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: { display: true, position: 'top', labels: { boxWidth: 10, padding: 6, font: { size: 10 } } }
+      },
+      scales: {
+        x: { grid: { display: false }, ticks: { color: '#555555', font: { size: 10 } } },
+        y: { grid: { color: 'rgba(0,189,170,0.06)' }, ticks: { color: '#555555', font: { size: 10 }, callback: v => v.toLocaleString() + '万' } }
+      }
+    }
+  });
+}
+
+function initEvaTrendChart() {
+  const evaData = [9800, 11200, 13500, 12800, 10590, 14355, null, null, null, null, null, null];
+  const budgetData = [6250, 6250, 6250, 6250, 6250, 6250, 6250, 6250, 6250, 6250, 6250, 6250];
+  
+  if (charts['evaTrend']) charts['evaTrend'].destroy();
+  
+  charts['evaTrend'] = new Chart(document.getElementById('evaTrendChart'), {
+    type: 'line',
+    data: {
+      labels: months,
+      datasets: [
+        { label: 'EVA实际值', data: evaData, borderColor: '#4caf50', backgroundColor: 'rgba(76, 175, 80, 0.1)', borderWidth: 3, fill: true, tension: 0.4, pointRadius: 5, pointBackgroundColor: '#4caf50' },
+        { label: '月度预算', data: budgetData, borderColor: '#ff9800', borderWidth: 2, borderDash: [5, 4], pointRadius: 0 }
+      ]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: { display: true, position: 'top', labels: { boxWidth: 10, padding: 6, font: { size: 10 } } },
+        annotation: {
+          annotations: {
+            line1: {
+              type: 'line',
+              yMin: 0, yMax: 0,
+              borderColor: '#c62828',
+              borderWidth: 1,
+              borderDash: [2, 2]
+            }
+          }
+        }
+      },
+      scales: {
+        x: { grid: { color: 'rgba(0,189,170,0.06)' }, ticks: { color: '#555555', font: { size: 10 } } },
+        y: { grid: { color: 'rgba(0,189,170,0.06)' }, ticks: { color: '#555555', font: { size: 10 }, callback: v => v.toLocaleString() + '万' } }
+      }
+    }
+  });
+}
+
+function initLossPies() {
+  const countLabels = ['山西风电', '贵州光伏', '东北新能源', '其他亏损企业'];
+  const countValues = [1, 1, 1, 7];
+  const amountLabels = ['山西风电', '贵州光伏', '东北新能源', '其他亏损企业'];
+  const amountValues = [5680, 2340, 1890, 2100];
+  const colors = ['#c62828', '#e65100', '#ff9800', '#78909C'];
+
+  if (charts['lossCount']) charts['lossCount'].destroy();
+  charts['lossCount'] = new Chart(document.getElementById('lossCountPie'), {
+    type: 'pie',
+    data: {
+      labels: countLabels,
+      datasets: [{ data: countValues, backgroundColor: colors, borderColor: '#ffffff', borderWidth: 2 }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: { legend: { display: false } }
+    }
+  });
+
+  if (charts['lossAmount']) charts['lossAmount'].destroy();
+  charts['lossAmount'] = new Chart(document.getElementById('lossAmountPie'), {
+    type: 'pie',
+    data: {
+      labels: amountLabels,
+      datasets: [{ data: amountValues, backgroundColor: colors, borderColor: '#ffffff', borderWidth: 2 }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: { legend: { display: false } }
+    }
+  });
+
+  buildLossLegends();
+}
+
+function buildLossLegends() {
+  const countData = [1, 1, 1, 7];
+  const amountData = [5680, 2340, 1890, 2100];
+  const labels = ['山西风电', '贵州光伏', '东北新能源', '其他亏损企业'];
+  const colors = ['#c62828', '#e65100', '#ff9800', '#78909C'];
+  
+  const totalCount = countData.reduce((a, b) => a + b, 0);
+  const totalAmount = amountData.reduce((a, b) => a + b, 0);
+
+  document.getElementById('lossCountLegend').innerHTML = labels.map((l, i) => {
+    const pct = ((countData[i] / totalCount) * 100).toFixed(1);
+    return `<div class="pie-legend-item"><div class="pie-dot" style="background: ${colors[i]};"></div><span>${l}</span><span style="margin-left: auto; font-weight: 600;">${countData[i]}户 (${pct}%)</span></div>`;
+  }).join('');
+
+  document.getElementById('lossAmountLegend').innerHTML = labels.map((l, i) => {
+    const pct = ((amountData[i] / totalAmount) * 100).toFixed(1);
+    return `<div class="pie-legend-item"><div class="pie-dot" style="background: ${colors[i]};"></div><span>${l}</span><span style="margin-left: auto; font-weight: 600;">${amountData[i].toLocaleString()}万 (${pct}%)</span></div>`;
+  }).join('');
+}
+
+initCharts();
+</script>
+</body>
+</html>
